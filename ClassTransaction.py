@@ -33,11 +33,6 @@ class Transaction:
     # def deleteAccountRecord(self):
     #     conn = sqlite3.connect('./database.db')
     #     cursor = conn.cursor()
-    #     cursor.execute('''CREATE TABLE IF NOT EXISTS transactions (transaction_id INTEGER PRIMARY KEY AUTOINCREMENT, ticker VARCHAR, price DOUBLE,
-    #             quantity INTEGER, account_id INTEGER, transaction_type VARCHAR, date DATE)''')
-    #     # cursor.execute(f'INSERT INTO transactions (ticker, price, quantity, account_id, transaction_type, date) '
-    #     #                f'VALUES ({self.ticker}, {self.price}, {self.quantity}, {self.account_id}, {self.transaction_type}, {self.date})')
-    #     conn.commit()
-    #     insterted_id = cursor.lastrowid
+    #     cursor.execute()
     #     conn.close()
     #     return insterted_id
