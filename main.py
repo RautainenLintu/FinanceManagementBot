@@ -11,8 +11,7 @@ from aiogram.dispatcher.filters import Command
 import sqlite3
 from datetime import datetime
 
-#bot = Bot(token="BOT_TOKEN")
-bot = Bot(token="7354546719:AAGhejY3xBphGd8OmpoZpjSEc1Ni_L5QLTQ")
+bot = Bot(token="BOT_TOKEN")
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
