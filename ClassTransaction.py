@@ -9,7 +9,8 @@ class DeleteTransactionStates(StatesGroup):
 
 class Transaction:
 
-    def __init__(self, ticker, price, quantity, account_id, transaction_type, date) -> None:
+    def __init__(self, telegram_id, ticker, price, quantity, account_id, transaction_type, date) -> None:
+        self.telegram_id = telegram_id
         self.ticker = ticker
         self.price = price
         self.quantity = quantity
@@ -22,17 +23,23 @@ class Transaction:
         insterted_id = None
         conn = sqlite3.connect('./database.db')
         cursor = conn.cursor()
-        cursor.execute('''CREATE TABLE IF NOT EXISTS transactions (transaction_id INTEGER PRIMARY KEY AUTOINCREMENT, ticker VARCHAR, price DOUBLE, 
+        cursor.execute('''CREATE TABLE IF NOT EXISTS transactions (transaction_id INTEGER PRIMARY KEY AUTOINCREMENT, telegram_id INTEGER, ticker VARCHAR, price DOUBLE,
         quantity INTEGER, account_id INTEGER, transaction_type VARCHAR, date DATE)''')
-        cursor.execute(f'INSERT INTO transactions (ticker, price, quantity, account_id, transaction_type, date) VALUES ({self.ticker}, {self.price}, {self.quantity}, {self.account_id}, {self.transaction_type}, {self.date})')
+        cursor.execute(f'INSERT INTO transactions (telegram_id, ticker, price, quantity, account_id, transaction_type, date) VALUES ({self.telegram_id}, \'{self.ticker}\', {self.price}, {self.quantity}, {self.account_id}, \'{self.transaction_type}\', \'{self.date}\')')
         conn.commit()
         insterted_id = cursor.lastrowid
         conn.close()
         return insterted_id
 
-    # def deleteAccountRecord(self):
-    #     conn = sqlite3.connect('./database.db')
-    #     cursor = conn.cursor()
-    #     cursor.execute()
-    #     conn.close()
-    #     return insterted_id
+    @staticmethod
+    def deleteAccountRecord(telegram_id, transaction_id):
+        row_number = None
+        conn = sqlite3.connect('./database.db')
+        cursor = conn.cursor()
+        cursor.execute('''CREATE TABLE IF NOT EXISTS transactions (transaction_id INTEGER PRIMARY KEY AUTOINCREMENT, telegram_id INTEGER, ticker VARCHAR, price DOUBLE,
+                quantity INTEGER, account_id INTEGER, transaction_type VARCHAR, date DATE)''')
+        cursor.execute(f'DELETE FROM transactions WHERE transaction_id = {transaction_id} AND telegram_id = {telegram_id}')
+        conn.commit()
+        row_number = cursor.rowcount
+        conn.close()
+        return row_number
