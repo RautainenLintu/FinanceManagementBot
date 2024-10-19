@@ -6,7 +6,7 @@ class User:
         self.telegram_id = telegram_id
 
     def checkUserRecord(self):
-        conn = sqlite3.connect('./database.db')
+        conn = sqlite3.connect('./app_data/database.db')
         cursor = conn.cursor()
         cursor.execute('''CREATE TABLE IF NOT EXISTS users (telegram_id INTEGER PRIMARY KEY)''')
         cursor.execute('SELECT * FROM users WHERE telegram_id = ?', (self.telegram_id,))
@@ -21,7 +21,7 @@ class User:
 
     def createUserRecord(self):
         insterted_id = None
-        conn = sqlite3.connect('./database.db')
+        conn = sqlite3.connect('./app_data/database.db')
         cursor = conn.cursor()
         cursor.execute('''CREATE TABLE IF NOT EXISTS users (telegram_id INTEGER PRIMARY KEY)''')
         cursor.execute('INSERT INTO users (telegram_id) VALUES (?)', (self.telegram_id,))
