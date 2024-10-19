@@ -8,7 +8,8 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from help_msg import HelpMessage
 
-bot = Bot(token="BOT_TOKEN")
+# bot = Bot(token="BOT_TOKEN")
+bot = Bot(token="7354546719:AAGhejY3xBphGd8OmpoZpjSEc1Ni_L5QLTQ")
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
