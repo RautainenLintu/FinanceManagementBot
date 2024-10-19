@@ -94,6 +94,7 @@ class Account:
         cursor.execute('''CREATE TABLE IF NOT EXISTS accounts (account_id INTEGER PRIMARY KEY, telegram_id INTEGER, balance DOUBLE)''')
         cursor.execute(f'DELETE FROM accounts WHERE account_id = {self.account_id} AND telegram_id = {self.telegram_id}')
         conn.commit()
+
         insterted_id = cursor.lastrowid
         conn.close()
         return insterted_id
