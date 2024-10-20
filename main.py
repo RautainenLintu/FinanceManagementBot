@@ -1,3 +1,4 @@
+from ClassPortfolio import Portfolio
 from apimoexIntegration import checkSecurityExistence, getSecurityPrice
 from ClassPosition import Position
 from ClassUser import User
@@ -7,8 +8,10 @@ from aiogram import Bot, Dispatcher, types, executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from help_msg import HelpMessage
+from checkSyntax import checkDate
 
-bot = Bot(token="BOT_TOKEN")
+# bot = Bot(token="BOT_TOKEN")
+bot = Bot(token="7354546719:AAGhejY3xBphGd8OmpoZpjSEc1Ni_L5QLTQ")
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
@@ -40,14 +43,14 @@ async def addAccount_start(message: types.Message):
 async def addAccount_exec(message: types.Message, state: FSMContext):
     user_input = message.text.split(" ")
     try:
-        account_id = int(user_input[0])
+        account_id = user_input[0]
         assert len(user_input[1].split(".")[1]) == 2
         balance = float(user_input[1])
         assert balance >= 0.0
     except:
         await message.reply("Некорректный ввод. Пожалуйста, повторите команду.")
     else:
-        account = Account(int(account_id), message.from_user.id)
+        account = Account(account_id, message.from_user.id)
         account_record = account.checkAccountRecord()
         if account_record is None:
             account.createAccountRecord(balance)
@@ -69,7 +72,7 @@ async def updateBalance_exec(message: types.Message, state: FSMContext):
     user_input = message.text.split(" ")
     try:
         assert len(user_input) == 3
-        account_id = int(user_input[0])
+        account_id = user_input[0]
         assert len(user_input[1].split(".")[1]) == 2 or (len(user_input[1].split(".")[1]) == 1 and user_input[1].split(".")[1] == '0')
         sum = float(user_input[1])
         assert sum > 0.0
@@ -102,7 +105,7 @@ async def deleteAccount_start(message: types.Message):
 @dp.message_handler(state=DeleteAccountStates.DeleteAccountID)
 async def deleteAccount_exec(message: types.Message, state: FSMContext):
     try:
-        account_id = int(message.text)
+        account_id = message.text
     except ValueError:
         await message.reply("Некорректный ввод. Пожалуйста, повторите команду.")
     else:
@@ -151,7 +154,7 @@ async def addTransaction_exec(message: types.Message, state: FSMContext):
             assert price > 0
             quantity = int(user_input[2])
             assert quantity > 0
-            account_id = int(user_input[3])
+            account_id = user_input[3]
             transaction_type = user_input[4]
             assert transaction_type in ['BUY', 'SELL']
             date = user_input[5]
@@ -173,7 +176,7 @@ async def addTransaction_exec(message: types.Message, state: FSMContext):
                 except AssertionError:
                     await message.reply(f"Недостаточно средств для покупки. Проверьте баланс счета с помощью /seeAccounts и пополните счет с помощью /updateBalance")
                 else:
-                    position_data = Position.checkPositionOpened(transaction)
+                    position_data = Position.checkPositionOpened(telegram_id, account_id, ticker)
                     if position_data is None:
                         position = Position(telegram_id, ticker, quantity, account_id)
                         position.OpenPosition()
@@ -184,7 +187,7 @@ async def addTransaction_exec(message: types.Message, state: FSMContext):
                     account.updateBalance(total, "СНЯТИЕ")
             elif transaction_type == 'SELL':
                 total = quantity * price
-                position_data = Position.checkPositionOpened(transaction)
+                position_data = Position.checkPositionOpened(telegram_id, account_id, ticker)
                 if position_data is None:
                     await message.reply(f"Не найдена доступная к продаже позиция. Убедитесь, что вы купили позицию и внесли ее в бот. Проверьте данные и повторите попытку")
                 else:
@@ -219,9 +222,12 @@ async def deleteTransaction_exec(message: types.Message, state: FSMContext):
     else:
         transaction = Transaction.getTransactionRecord(message.from_user.id, transaction_id)
         if transaction is not None:
-            transaction.revertTransaction()
-            Transaction.deleteTransactionRecord(message.from_user.id, transaction_id)
-            await message.reply("Транзакция успешно удалена.")
+            try:
+                assert transaction.revertTransaction()
+                Transaction.deleteTransactionRecord(message.from_user.id, transaction_id)
+                await message.reply("Транзакция успешно удалена.")
+            except AssertionError:
+                await message.reply("Ошибка при удалении транзакции. Возможно, Вы уже продали позиции, транзакцию по которым пытаетесь отменить.")
         else:
             await message.reply("Транзакция не найдена или принадлежит другому пользователю. Убедитесь в правильности ввода и повторите команду.")
     finally:
@@ -251,17 +257,21 @@ async def seeTransaction_exec(message: types.Message, state: FSMContext):
         await state.finish()
 
 
-def checkDate(string_date):
-    part_list = string_date.split("-")
-    if len(part_list) != 3:
-        return False
-    if (len(part_list[0]) != 4) or (len(part_list[1]) != 2) or (len(part_list[2]) != 2):
-        return False
-    for item in part_list:
-        for letter in item:
-            if letter not in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
-                return False
-    return True
+@dp.message_handler(commands=['seePortfolio'])
+async def seePortfolio_start(message: types.Message):
+    telegram_id = message.from_user.id
+    Portfolio(telegram_id).generateReport()
+    with open(f'./app_reports/report_{telegram_id}.xlsx', 'rb') as f1:
+        await bot.send_document(message.chat.id, f1)
+
+@dp.message_handler(commands=['totalPortfolio'])
+async def seePortfolio_start(message: types.Message):
+    telegram_id = message.from_user.id
+    total, isIncomplete = Portfolio(telegram_id).totalPortfolio()
+    answer = f"Общая стоимость портфолио: {total} RUB. "
+    if isIncomplete:
+        answer += "В стоимости не учтены активы, для которых не удалось получить данные Мосбиржи. Для генерации подробного отчета введите /seePortfolio"
+    await message.reply(answer)
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
