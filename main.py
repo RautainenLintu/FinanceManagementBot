@@ -98,26 +98,28 @@ async def updateBalance_exec(message: types.Message, state: FSMContext):
 
 @dp.message_handler(commands=['deleteAccount'])
 async def deleteAccount_start(message: types.Message):
-    await message.reply("Введите номер счета в числовом формате без буквенных символов, специальных символов и пробелов:")
+    await message.reply("Внимание! При удалении счета все имеющиеся на нем позиции будут автоматически закрыты по рыночной цене. Если Вы хотите продолжить, введите "
+                        "номер счета. Если Вы хотите отменить операцию, введите ОТМЕНА.")
     await DeleteAccountStates.DeleteAccountID.set()
 
 
 @dp.message_handler(state=DeleteAccountStates.DeleteAccountID)
 async def deleteAccount_exec(message: types.Message, state: FSMContext):
-    try:
-        account_id = message.text
-    except ValueError:
-        await message.reply("Некорректный ввод. Пожалуйста, повторите команду.")
+    if message.text == "ОТМЕНА":
+        await message.reply("Операция отменена")
     else:
+        account_id = message.text
         account = Account(int(account_id), message.from_user.id)
         account_record = account.checkAccountRecord()
         if account_record is None:
             await message.reply("Счет не существует.")
         else:
-            account.deleteAccountRecord()
-            await message.reply("Счет успешно удален.")
-    finally:
-        await state.finish()
+            total = account.deleteAccountRecord()
+            if total is not None:
+                await message.reply(f"Счет успешно удален. Сумма на счете на момент удаления")
+            else:
+                await message.reply("Ошибка при удалении счета. Попробуйте позднее.")
+    await state.finish()
 
 
 @dp.message_handler(commands=['seeAccounts'])
