@@ -9,7 +9,7 @@ class HelpMessage:
         /addAccount - добавление счета
         /updateBalance - изменение баланса счета
         /seeAccounts - просмотр списка счетов
-        /deleteAccount - удаление счета. TODO: удаление всех открытых позиций при удалении аккаунта (автоматическое закрытие позиций)
+        /deleteAccount - удаление счета
         /addTransaction - добавление транзакции
         /seeTransaction - просмотр ранее добавленной транзакции
         /deleteTransaction - удаление транзакции
