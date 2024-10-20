@@ -144,7 +144,7 @@ class positionTests(unittest.TestCase):
 
     def testCheckPositionOpened(self):
         self.assertIsNotNone(main.Position.checkPositionOpened(self.test_telegram_id, self.test_account_id, self.test_position1.ticker))
-        self.assertIsNone(main.Position.checkPositionOpened(self.test_telegram_id, self.test_account_id, self.test_position2.ticker))
+        self.assertIsNone(main.Position.checkPositionOpened(self.test_telegram_id, self.test_account_id, "BSPB"))
 
     def testOpenPosition(self):
         row_id = self.test_position2.OpenPosition()
@@ -169,11 +169,7 @@ class positionTests(unittest.TestCase):
         cursor.execute(f'DELETE FROM accounts WHERE account_id = {self.test_account_id} AND telegram_id = {self.test_telegram_id}')
         cursor.execute(f'DELETE FROM accounts WHERE account_id = {self.test_account_id} AND telegram_id = {self.test_telegram_id}')
         cursor.execute(
-            f'DELETE FROM positions WHERE telegram_id = {self.test_position1.telegram_id} AND ticker = \'{self.test_position1.ticker}\' AND '
-            f'account_id = \'{self.test_position1.account_id}\' AND position_type = \'{self.test_position1.position_type}\'')
-        cursor.execute(
-            f'DELETE FROM positions WHERE telegram_id = {self.test_position2.telegram_id} AND ticker = \'{self.test_position2.ticker}\' AND '
-            f'account_id = \'{self.test_position2.account_id}\' AND position_type = \'{self.test_position2.position_type}\'')
+        f'DELETE FROM positions WHERE telegram_id = {self.test_telegram_id}')
         conn.commit()
         conn.close()
 
@@ -262,25 +258,34 @@ class TransactionTests(unittest.TestCase):
         cursor = conn.cursor()
         cursor.execute('DELETE FROM users WHERE telegram_id = ?', (self.test_telegram_id,))
         cursor.execute(f'DELETE FROM accounts WHERE account_id = {self.test_account_id} AND telegram_id = {self.test_telegram_id}')
-        cursor.execute(
-            f'DELETE FROM transactions WHERE telegram_id = {self.test_transaction_buy.telegram_id} AND '
-            f'ticker = \'{self.test_transaction_buy.ticker}\' AND price = {self.test_transaction_buy.price} '
-            f'AND quantity = {self.test_transaction_buy.quantity} AND account_id = \'{self.test_transaction_buy.account_id}\' '
-            f'AND transaction_type = \'{self.test_transaction_buy.transaction_type}\' AND date = \'{self.test_transaction_buy.date}\'')
-        cursor.execute(f'DELETE FROM positions WHERE telegram_id = {self.test_position.telegram_id} AND ticker = \'{self.test_position.ticker}\' AND '
-                       f'account_id = \'{self.test_position.account_id}\' AND position_type = \'{self.test_position.position_type}\'')
-        cursor.execute(
-            f'DELETE FROM transactions WHERE telegram_id = {self.test_transaction_sell.telegram_id} AND '
-            f'ticker = \'{self.test_transaction_sell.ticker}\' AND price = {self.test_transaction_sell.price} '
-            f'AND quantity = {self.test_transaction_sell.quantity} AND account_id = \'{self.test_transaction_sell.account_id}\' '
-            f'AND transaction_type = \'{self.test_transaction_sell.transaction_type}\' AND date = \'{self.test_transaction_sell.date}\'')
+        cursor.execute(f'DELETE FROM transactions WHERE telegram_id = {self.test_transaction_buy.telegram_id}')
+        cursor.execute(f'DELETE FROM transactions WHERE telegram_id = {self.test_transaction_sell.telegram_id}')
         conn.commit()
         conn.close()
 
 
-class portfolioTests(unittest.TestCase):
-    pass
+class apiTests(unittest.TestCase):
 
+    def checkSecurityExistence(self):
+        test_stock_id = "SBER"
+        test_response_json = {"boards": {"data": [["SBER"]]}}
+
+        with mock.patch('requests.get') as mock_get:
+            mock_response_success = mock.Mock()
+            mock_response_success.status_code = 200
+            mock_response_success.json.return_value = test_response_json
+
+            mock_response_error = mock.Mock()
+            mock_response_error.status_code = 400
+            mock_response_error.json.return_value = None
+
+            mock_get.return_value = mock_response_success
+            result_success = main.checkSecurityExistence(test_stock_id)
+            self.assertTrue(result_success)
+
+            mock_get.return_value = mock_response_error
+            result_error = main.checkSecurityExistence(test_stock_id)
+            self.assertFalse(result_error)
 
 if __name__ == '__main__':
     unittest.main()
