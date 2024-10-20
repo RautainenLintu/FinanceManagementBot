@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 from ClassPortfolio import Portfolio
 from apimoexIntegration import checkSecurityExistence, getSecurityPrice
 from ClassPosition import Position
@@ -10,8 +12,10 @@ from aiogram.dispatcher import FSMContext
 from help_msg import HelpMessage
 from checkSyntax import checkDate
 
-# bot = Bot(token="BOT_TOKEN")
-bot = Bot(token="7354546719:AAGhejY3xBphGd8OmpoZpjSEc1Ni_L5QLTQ")
+load_dotenv()
+
+api_token = os.getenv('API_TOKEN')
+bot = Bot(token=api_token)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
