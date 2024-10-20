@@ -8,7 +8,6 @@ class Portfolio:
         self.telegram_id = telegram_id
 
     def getUserPortfolio(self):
-        # SELECT ticker, quantity, account_id FROM positions WHERE telegram_id = 470534054
         conn = sqlite3.connect('./app_data/database.db')
         cursor = conn.cursor()
         cursor.execute('''CREATE TABLE IF NOT EXISTS positions (position_id INTEGER PRIMARY KEY AUTOINCREMENT, telegram_id INTEGER, ticker VARCHAR,
@@ -58,4 +57,3 @@ class Portfolio:
             row += 1
         workbook.close()
 
-# portfolio = Portfolio(470534054).generateReport()

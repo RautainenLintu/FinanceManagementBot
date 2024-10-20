@@ -67,26 +67,3 @@ class Position:
         conn.commit()
         conn.close()
 
-    def closePosition(self):
-        pass
-
-
-    # @staticmethod
-    # def checkShortPositionOpened():
-    #     pass #TODO
-
-    # @staticmethod
-    # def OpenLongPosition(telegram_id, transaction_id):
-    #     pass
-
-    # @staticmethod
-    # def CloseShortPosition(telegram_id, transaction_id):
-    #     pass #TODO
-
-    # @staticmethod
-    # def CloseLongPosition(telegram_id, transaction_id):
-    #     pass
-
-    # @staticmethod
-    # def checkShortPositionOpened():
-    #     pass #TODO
