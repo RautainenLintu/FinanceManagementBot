@@ -109,14 +109,17 @@ async def deleteAccount_exec(message: types.Message, state: FSMContext):
         await message.reply("Операция отменена")
     else:
         account_id = message.text
-        account = Account(int(account_id), message.from_user.id)
+        account = Account(account_id, message.from_user.id)
         account_record = account.checkAccountRecord()
         if account_record is None:
             await message.reply("Счет не существует.")
         else:
-            total = account.deleteAccountRecord()
-            if total is not None:
-                await message.reply(f"Счет успешно удален. Сумма на счете на момент удаления")
+            total_securities = account.deleteAccountRecord()
+            if total_securities is not None:
+                account_balance = account.getAccountBalance()
+                total = total_securities + account_balance
+                await message.reply(f"Счет успешно удален. Сумма на счете на момент удаления {total} RUB. "
+                                    f"Если вы перевели ее на другой счет, не забудьте отразить это с помощью команды /updateBalance")
             else:
                 await message.reply("Ошибка при удалении счета. Попробуйте позднее.")
     await state.finish()

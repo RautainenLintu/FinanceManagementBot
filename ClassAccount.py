@@ -83,6 +83,17 @@ class Account:
         conn.close()
         return account_list
 
+    def getAccountBalance(self):
+        conn = sqlite3.connect('./app_data/database.db')
+        cursor = conn.cursor()
+        cursor.execute(
+            '''CREATE TABLE IF NOT EXISTS accounts (account_id VARCHAR PRIMARY KEY, telegram_id INTEGER, balance DOUBLE)''')
+        cursor.execute(
+            f'SELECT balance FROM accounts WHERE telegram_id = {self.telegram_id} AND account_id = \'{self.account_id}\'')
+        balance = cursor.fetchone[0]
+        conn.close()
+        return balance
+
     def createAccountRecord(self, init_balance):
         insterted_id = None
         conn = sqlite3.connect('./app_data/database.db')
