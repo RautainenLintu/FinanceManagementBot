@@ -33,8 +33,8 @@ class Transaction:
         conn = sqlite3.connect('./app_data/database.db')
         cursor = conn.cursor()
         cursor.execute('''CREATE TABLE IF NOT EXISTS transactions (transaction_id INTEGER PRIMARY KEY AUTOINCREMENT, telegram_id INTEGER, ticker VARCHAR, price DOUBLE,
-        quantity INTEGER, account_id INTEGER, transaction_type VARCHAR, date DATE)''')
-        cursor.execute(f'INSERT INTO transactions (telegram_id, ticker, price, quantity, account_id, transaction_type, date) VALUES ({self.telegram_id}, \'{self.ticker}\', {self.price}, {self.quantity}, {self.account_id}, \'{self.transaction_type}\', \'{self.date}\')')
+        quantity INTEGER, account_id VARCHAR, transaction_type VARCHAR, date DATE)''')
+        cursor.execute(f'INSERT INTO transactions (telegram_id, ticker, price, quantity, account_id, transaction_type, date) VALUES ({self.telegram_id}, \'{self.ticker}\', {self.price}, {self.quantity}, \'{self.account_id}\', \'{self.transaction_type}\', \'{self.date}\')')
         conn.commit()
         insterted_id = cursor.lastrowid
         conn.close()
@@ -45,11 +45,10 @@ class Transaction:
         conn = sqlite3.connect('./app_data/database.db')
         cursor = conn.cursor()
         cursor.execute('''CREATE TABLE IF NOT EXISTS transactions (transaction_id INTEGER PRIMARY KEY AUTOINCREMENT, telegram_id INTEGER, ticker VARCHAR, price DOUBLE,
-                        quantity INTEGER, account_id INTEGER, transaction_type VARCHAR, date DATE)''')
+                        quantity INTEGER, account_id VARCHAR, transaction_type VARCHAR, date DATE)''')
         cursor.execute(f'SELECT * FROM transactions WHERE transaction_id = {transaction_id} AND telegram_id = {telegram_id}')
         conn.commit()
         transaction_data = cursor.fetchone()
-        print(transaction_data)
         rowcount = cursor.execute(f'SELECT COUNT(*) FROM transactions WHERE transaction_id = {transaction_id} AND telegram_id = {telegram_id}').fetchone()[0]
         conn.close()
         if rowcount < 1:
@@ -62,7 +61,7 @@ class Transaction:
         conn = sqlite3.connect('./app_data/database.db')
         cursor = conn.cursor()
         cursor.execute('''CREATE TABLE IF NOT EXISTS transactions (transaction_id INTEGER PRIMARY KEY AUTOINCREMENT, telegram_id INTEGER, ticker VARCHAR, price DOUBLE,
-                quantity INTEGER, account_id INTEGER, transaction_type VARCHAR, date DATE)''')
+                quantity INTEGER, account_id VARCHAR, transaction_type VARCHAR, date DATE)''')
         cursor.execute(f'DELETE FROM transactions WHERE transaction_id = {transaction_id} AND telegram_id = {telegram_id}')
         conn.commit()
         row_number = cursor.rowcount
@@ -73,20 +72,32 @@ class Transaction:
         account = Account(self.account_id, self.telegram_id)
         if self.transaction_type == 'SELL':  # revert 'SELL' transaction by "buying" a security
             total = self.quantity * self.price
-            position_data = Position.checkPositionOpened(self)
-            if position_data is None:
-                position = Position(self.telegram_id, self.ticker, self.quantity, self.account_id)
-                position.OpenPosition()
+            try:
+                assert account.checkFundsSufficiency(total)
+            except AssertionError:
+                return False
             else:
-                self.updatePosition(position_data[0], self.quantity)
-            transaction_id = self.createTransactionRecord()
-            account.updateBalance(total, "СНЯТИЕ")
+                position_data = Position.checkPositionOpened(self.telegram_id, self.account_id, self.ticker)
+                if position_data is None:
+                    position = Position(self.telegram_id, self.ticker, self.quantity, self.account_id)
+                    position.OpenPosition()
+                else:
+                    Position.updatePosition(position_data[0], self.quantity)
+                account.updateBalance(total, "СНЯТИЕ")
+            return True
         else:  # transaction_type == 'BUY'
             total = self.quantity * self.price
-            position_data = Position.checkPositionOpened(self)
-            if self.quantity == position_data[1]:
-                Position.ClosePosition(position_data[0])
-                account.updateBalance(total, "ПОПОЛНЕНИЕ")
+            position_data = Position.checkPositionOpened(self.telegram_id, self.account_id, self.ticker)
+            if position_data is None:
+                return False
             else:
-                Position.updatePosition(position_data[0], -self.quantity)
-                account.updateBalance(total, "ПОПОЛНЕНИЕ")
+                if self.quantity == position_data[1]:
+                    Position.ClosePosition(position_data[0])
+                    account.updateBalance(total, "ПОПОЛНЕНИЕ")
+                    return True
+                elif self.quantity > position_data[1]:
+                    return False
+                else:
+                    Position.updatePosition(position_data[0], -self.quantity)
+                    account.updateBalance(total, "ПОПОЛНЕНИЕ")
+                    return True
