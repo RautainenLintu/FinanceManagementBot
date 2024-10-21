@@ -2,4 +2,4 @@ This is a university project
 
 Telegram: @AssetsRegistrationBot
 
-v.0.0.6
+v.0.0.7
