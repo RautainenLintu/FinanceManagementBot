@@ -1,4 +1,5 @@
 /app_data/
+/app_data/database.db
 .coverage
 /.help
 /.idea/
