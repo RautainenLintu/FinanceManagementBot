@@ -1,0 +1,4 @@
+aiogram==2.23.1
+python-dotenv==1.0.1
+Requests==2.32.3
+XlsxWriter==3.2.0
