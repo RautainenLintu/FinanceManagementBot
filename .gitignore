@@ -1,8 +1,8 @@
-/app_data
+/app_data/
 .coverage
 /.help
 /.idea/
-/__pychache__
-/app_reports
+/__pychache__/
+/app_reports/
 .env
 .dockerignore
