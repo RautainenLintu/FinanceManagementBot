@@ -43,4 +43,4 @@ jobs:
             -e API_TOKEN=${{ secrets.API_TOKEN }} \
             -v /home/friman/app_data:/app/app_data \
             --name main_container \
-            malyshkoa2/lesson_5
+            rautainenlintu/financemanagementbot
