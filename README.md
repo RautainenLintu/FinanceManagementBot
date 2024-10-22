@@ -6,4 +6,4 @@ v.0.1.0
 Pre-final version (for Task 3): main functionality, unittest, CI/CD
 Subject to change before final presentation.
 
-Bug found - /see Portfolio feature
+Bug found with /see Portfolio feature
