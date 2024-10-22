@@ -40,7 +40,7 @@ class Portfolio:
 
 
     def generateReport(self):
-        workbook = xlsxwriter.Workbook(f'./app_reports/report_{self.telegram_id}.xlsx')
+        workbook = xlsxwriter.Workbook(f'./app_data/report_{self.telegram_id}.xlsx')
         worksheet = workbook.add_worksheet()
         portfolio = self.getUserPortfolio()
         row = 0
