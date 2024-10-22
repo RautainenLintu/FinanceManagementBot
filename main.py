@@ -270,7 +270,7 @@ async def seeTransaction_exec(message: types.Message, state: FSMContext):
 async def seePortfolio_start(message: types.Message):
     telegram_id = message.from_user.id
     Portfolio(telegram_id).generateReport()
-    with open(f'./app_data/report_{telegram_id}.xlsx', 'rb') as f1:
+    with open(f'./app/app_data/report_{telegram_id}.xlsx', 'rb') as f1:
         await bot.send_document(message.chat.id, f1)
 
 @dp.message_handler(commands=['totalPortfolio'])
