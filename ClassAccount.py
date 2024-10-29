@@ -90,7 +90,11 @@ class Account:
             '''CREATE TABLE IF NOT EXISTS accounts (account_id VARCHAR PRIMARY KEY, telegram_id INTEGER, balance DOUBLE)''')
         cursor.execute(
             f'SELECT balance FROM accounts WHERE telegram_id = {self.telegram_id} AND account_id = \'{self.account_id}\'')
-        balance = cursor.fetchone()[0]
+        result = cursor.fetchone()
+        if result is None:
+            balance = None
+        else:
+            balance = result[0]
         conn.close()
         return balance
 
