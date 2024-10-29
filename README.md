@@ -2,8 +2,5 @@ This is a university project
 
 Telegram: @AssetsRegistrationBot
 
-v.0.1.0
-Pre-final version (for Task 3): main functionality, unittest, CI/CD
-Subject to change before final presentation.
-
-Bug found with /see Portfolio feature
+v.0.2.0
+Final version: main functionality, unittest, CI/CD
