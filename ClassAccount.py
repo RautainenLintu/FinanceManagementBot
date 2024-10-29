@@ -121,10 +121,10 @@ class Account:
                     return None
                 else:
                     Position.ClosePosition(position_data[0])
-        conn = sqlite3.connect('./app_data/database.db')
-        cursor = conn.cursor()
-        cursor.execute('''CREATE TABLE IF NOT EXISTS accounts (account_id VARCHAR PRIMARY KEY, telegram_id INTEGER, balance DOUBLE)''')
-        cursor.execute(f'DELETE FROM accounts WHERE account_id = \'{self.account_id}\' AND telegram_id = {self.telegram_id}')
-        conn.commit()
-        conn.close()
+                    conn = sqlite3.connect('./app_data/database.db')
+                    cursor = conn.cursor()
+                    cursor.execute('''CREATE TABLE IF NOT EXISTS accounts (account_id VARCHAR PRIMARY KEY, telegram_id INTEGER, balance DOUBLE)''')
+                    cursor.execute(f'DELETE FROM accounts WHERE account_id = \'{self.account_id}\' AND telegram_id = {self.telegram_id}')
+                    conn.commit()
+                    conn.close()
         return total
