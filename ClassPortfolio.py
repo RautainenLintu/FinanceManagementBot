@@ -49,7 +49,7 @@ class Portfolio:
         for i in range(4):
             worksheet.write(row, i, headers[i])
         row += 1
-        for ticker, quantity, account, price in (portfolio):
+        for ticker, account, quantity, price in (portfolio):
             worksheet.write(row, col, ticker)
             worksheet.write(row, col + 1, account)
             worksheet.write(row, col + 2, quantity)
