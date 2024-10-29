@@ -116,14 +116,15 @@ class Account:
             if security[1] == self.account_id:
                 position_data = Position.checkPositionOpened(self.telegram_id, self.account_id, security[0])
                 try:
-                    total += position_data[1] * apimoexIntegration.getSecurityPrice(security[0])
+                    total += float(security[2]) * float(security[3])
                 except:
                     return None
-                Position.ClosePosition(position_data[0])
-        conn = sqlite3.connect('./app_data/database.db')
-        cursor = conn.cursor()
-        cursor.execute('''CREATE TABLE IF NOT EXISTS accounts (account_id VARCHAR PRIMARY KEY, telegram_id INTEGER, balance DOUBLE)''')
-        cursor.execute(f'DELETE FROM accounts WHERE account_id = \'{self.account_id}\' AND telegram_id = {self.telegram_id}')
-        conn.commit()
-        conn.close()
+                else:
+                    Position.ClosePosition(position_data[0])
+                    conn = sqlite3.connect('./app_data/database.db')
+                    cursor = conn.cursor()
+                    cursor.execute('''CREATE TABLE IF NOT EXISTS accounts (account_id VARCHAR PRIMARY KEY, telegram_id INTEGER, balance DOUBLE)''')
+                    cursor.execute(f'DELETE FROM accounts WHERE account_id = \'{self.account_id}\' AND telegram_id = {self.telegram_id}')
+                    conn.commit()
+                    conn.close()
         return total
